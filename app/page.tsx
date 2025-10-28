@@ -1,65 +1,186 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from 'react';
+import { Button } from '@/components/button';
+import { Input } from '@/components/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/card';
+import { Minus, Plus, Send, PlusCircle } from 'lucide-react';
+import clsx from 'clsx';
+
+interface MenuItem {
+  name: string;
+  count: number;
+}
+
+interface Order {
+  id: number;
+  customerName: string;
+  menuItems: MenuItem[];
+}
+
+const initialMenuItems: MenuItem[] = [
+  { name: 'Keju', count: 0 },
+  { name: 'Jando', count: 0 },
+  { name: 'Ati', count: 0 },
+  { name: 'Ayam', count: 0 },
+  { name: 'Seblak', count: 0 },
+];
 
 export default function Home() {
+  const [orders, setOrders] = useState<Order[]>([
+    { id: 1, customerName: '', menuItems: [...initialMenuItems] }
+  ]);
+
+  const updateCount = (
+    orderId: number,
+    itemIndex: number,
+    delta: number,
+    e: React.MouseEvent
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setOrders(prevOrders => 
+      prevOrders.map(order => {
+        if (order.id !== orderId) return order;
+        return {
+          ...order,
+          menuItems: order.menuItems.map((item, idx) =>
+            idx === itemIndex
+              ? { ...item, count: Math.max(0, item.count + delta) }
+              : item
+          ),
+        };
+      })
+    );
+
+  };
+
+
+  const updateCustomerName = (orderId: number, name: string) => {
+    setOrders(prev => prev.map(order =>
+      order.id === orderId ? { ...order, customerName: name } : order
+    ));
+  };
+
+  const addNewOrder = () => {
+    const newId = Math.max(...orders.map(o => o.id)) + 1;
+    setOrders(prev => [...prev, {
+      id: newId,
+      customerName: '',
+      menuItems: [...initialMenuItems]
+    }]);
+  };
+
+  const handleSubmit = () => {
+    const validOrders = orders.filter(order => {
+      const hasName = order.customerName.trim();
+      const hasItems = order.menuItems.some(item => item.count > 0);
+      return hasName && hasItems;
+    });
+
+    if (validOrders.length === 0) {
+      alert('Please enter at least one valid order with name and items');
+      return;
+    }
+
+    const orderText = validOrders.map(order => {
+      const orderItems = order.menuItems.filter(item => item.count > 0);
+      return `*Halo saya:* ${order.customerName}\n*Mau Pesan:*\n${orderItems
+        .map(item => `${item.name}: ${item.count}`)
+        .join('\n')}`;
+    }).join('\n\n---\n\n');
+
+    const whatsappUrl = `https://wa.me/6282318000199?text=${encodeURIComponent(orderText)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="min-h-screen bg-linear-to-br from-orange-50 to-amber-50 py-8 px-4">
+      <div className="max-w-2xl mx-auto space-y-6">
+        {orders.map((order, orderIndex) => (
+          <Card key={order.id} className="shadow-xl">
+            <CardHeader className="bg-blue-400 text-white">
+              <CardTitle className="text-2xl font-bold text-center">
+                Cireng Berisi - Order #{orderIndex + 1}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div className="space-y-2">
+                <label htmlFor={`name-${order.id}`} className="text-sm font-medium text-gray-700">
+                  Nama
+                </label>
+                <Input
+                  id={`name-${order.id}`}
+                  type="text"
+                  placeholder="Pesanan atas nama..."
+                  value={order.customerName}
+                  onChange={(e) => updateCustomerName(order.id, e.target.value)}
+                  className="text-lg"
+                />
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-gray-800">Menu</h3>
+                {order.menuItems.map((item, index) => (
+                  <div
+                    key={item.name}
+                    className={clsx('flex items-center justify-between p-4 border-2 border-gray-200 rounded-lg hover:border-orange-300 transition-colors',
+                      {'bg-gray-200' : item.count === 0,
+                        'bg-white': item.count > 0
+                      }
+                    )}
+                  >
+                    <span className="text-lg font-medium text-gray-800">{item.name}</span>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={(e) => updateCount(order.id, index, -1, e)}
+                        disabled={item.count === 0}
+                        className="h-10 w-10 rounded-full"
+                        type="button"
+                      >
+                        <Minus className="h-4 w-4" />
+                      </Button>
+                      <span className="text-xl font-semibold min-w-8 text-center text-gray-900">
+                        {item.count}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={(e) => updateCount(order.id, index, 1, e)}
+                        className="h-10 w-10 rounded-full"
+                        type="button"
+                      >
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+
+        <Button
+          onClick={addNewOrder}
+          variant="outline"
+          className="hidden w-full border-2 border-orange-500 text-orange-600 hover:bg-orange-50 text-lg py-6"
+          type="button"
+        >
+          <PlusCircle className="mr-2 h-5 w-5" />
+          Add Another Order
+        </Button>
+
+        <Button
+          onClick={handleSubmit}
+          className="w-full bg-blue-500 hover:from-orange-600 hover:bg-blue-600 text-white text-lg py-6 shadow-lg"
+        >
+          <Send className="mr-2 h-5 w-5" />
+          Kirim Pesanan ke WhatsApp
+        </Button>
+      </div>
     </div>
   );
 }
