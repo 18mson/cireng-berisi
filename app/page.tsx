@@ -80,7 +80,7 @@ export default function Home() {
     });
 
     if (validOrders.length === 0) {
-      alert('Please enter at least one valid order with name and items');
+      alert('Tolong isi minimal satu pesanan dengan nama dan item yang dipilih.');
       return;
     }
 
