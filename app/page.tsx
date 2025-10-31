@@ -72,6 +72,11 @@ export default function Home() {
       customerName: '',
       menuItems: [...initialMenuItems]
     }]);
+
+    // Scroll to bottom after new order is added
+    setTimeout(() => {
+      window.scrollBy({ top: 300, behavior: 'smooth' });
+    }, 100);
   };
 
   const handleSubmit = () => {
@@ -92,7 +97,7 @@ export default function Home() {
     const orderText = validOrders.map(order => {
       const orderItems = order.menuItems.filter(item => item.count > 0);
       const totalItems = orderItems.reduce((sum, item) => sum + item.count, 0);
-      const matangMentahText = order.isMentah ? 'Mentah 🍳' : 'Matang 🍽';
+      const matangMentahText = order.isMentah ? 'Mentah' : 'Matang';
 
       return (
         `saya: *${order.customerName}* ✨\n` +
@@ -162,7 +167,20 @@ export default function Home() {
             <Card key={order.id} className="shadow-xl">
               <CardHeader className="bg-blue-300 text-white">
                 <CardTitle className="text-xl font-bold text-center">
-                  Cireng Berisi - Order #{orderIndex + 1}
+                  <div className="flex items-center justify-between w-full">
+                    <span>Cireng Berisi - Order #{orderIndex + 1}</span>
+                    {orders.length > 1 && (
+                      <button
+                        onClick={() =>
+                          setOrders((prev) => prev.filter((o) => o.id !== order.id))
+                        }
+                        className="hover:text-red-700 font-bold active:scale-80 h-10 w-10 transition-transform duration-150 bg-gray-500 text-white rounded-full p-1"
+                        aria-label="Remove order"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
@@ -184,7 +202,7 @@ export default function Home() {
                   <div className="flex justify-between">
                     <h3 className="text-xl font-semibold text-gray-800">Menu</h3>
                     <h3 className="text-xl font-semibold text-gray-800">
-                      Total: {totalItems}
+                      Total: {totalItems} 🥟
                     </h3>
                   </div>
                   {order.menuItems.map((item, index) => (
@@ -197,25 +215,25 @@ export default function Home() {
                       )}
                     >
                       <span className="text-lg font-medium text-gray-800">{item.name}</span>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 group">
                         <Button
                           variant="outline"
                           size="icon"
                           onClick={(e) => updateCount(order.id, index, -1, e)}
                           disabled={item.count === 0}
-                          className="h-10 w-10 rounded-full"
+                          className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
                           type="button"
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
-                        <span className="text-xl font-semibold min-w-8 text-center text-gray-900">
+                        <span className="text-xl font-semibold min-w-8 text-center text-gray-900 group-active:animate-ping">
                           {item.count}
                         </span>
                         <Button
                           variant="outline"
                           size="icon"
                           onClick={(e) => updateCount(order.id, index, 1, e)}
-                          className="h-10 w-10 rounded-full"
+                          className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
                           type="button"
                         >
                           <Plus className="h-4 w-4" />
@@ -240,7 +258,7 @@ export default function Home() {
                     >
                       <div
                         className={clsx(
-                          'w-1/2 h-full flex items-center justify-center text-white font-bold rounded-full transition-transform',
+                          'w-1/2 h-full flex items-center justify-center text-white font-bold rounded-full transition-transform active:scale-80',
                           order.isMentah ? 'translate-x-0 bg-red-600' : 'translate-x-full bg-green-600'
                         )}
                       >
@@ -257,7 +275,7 @@ export default function Home() {
         <Button
           onClick={addNewOrder}
           variant="outline"
-          className="w-full border-2 border-blue-500 text-blue-600 bg-gray-200 hover:bg-orange-50 text-lg py-6"
+          className="w-full border-2 border-blue-500 text-blue-600 bg-gray-200 hover:bg-orange-50 text-lg py-6 active:scale-80 transition-transform duration-150"
           type="button"
         >
           <PlusCircle className="mr-2 h-5 w-5" />
