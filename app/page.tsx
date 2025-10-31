@@ -92,16 +92,63 @@ export default function Home() {
     const orderText = validOrders.map(order => {
       const orderItems = order.menuItems.filter(item => item.count > 0);
       const totalItems = orderItems.reduce((sum, item) => sum + item.count, 0);
-      const matangMentahText = order.isMentah ? 'Mentah' : 'Matang';
+      const matangMentahText = order.isMentah ? 'Mentah 🍳' : 'Matang 🍽';
 
-      return `saya: *${order.customerName}*\nMau Cireng:  *${matangMentahText}*\n${orderItems
-        .map(item => `• ${item.name}: ${item.count}`)
-        .join('\n')}\nTotal: *${totalItems}*`;
+      return (
+        `saya: *${order.customerName}* ✨\n` +
+        `Mau Cireng: *${matangMentahText}*\n` +
+        `${orderItems.map(item => `• ${item.name}: ${item.count}`).join('\n')}\n` +
+        `Total: *${totalItems}* 🥟`
+      );
     }).join('\n\n-----\n\n');
+
+
+    const grandTotals = validOrders.reduce<Record<string, number>>((acc, order) => {
+      order.menuItems.forEach(item => {
+        acc[item.name] = (acc[item.name] || 0) + item.count;
+      });
+      return acc;
+    }, {});
+
+    const grandTotalItems = Object.values(grandTotals).reduce((sum, c) => sum + c, 0);
+
+    const matangTotals = validOrders
+      .filter(o => !o.isMentah)
+      .reduce<Record<string, number>>((acc, order) => {
+        order.menuItems.forEach(item => {
+          if (item.count > 0) acc[item.name] = (acc[item.name] || 0) + item.count;
+        });
+        return acc;
+      }, {});
+
+    const mentahTotals = validOrders
+      .filter(o => o.isMentah)
+      .reduce<Record<string, number>>((acc, order) => {
+        order.menuItems.forEach(item => {
+          if (item.count > 0) acc[item.name] = (acc[item.name] || 0) + item.count;
+        });
+        return acc;
+      }, {});
+
+    const summaryText =
+      validOrders.length > 1
+        ? `\n\n----------------\n✨*Total Keseluruhan:*✨\n` +
+          (Object.keys(matangTotals).length > 0
+            ? `*Matang:🍽*\n${Object.entries(matangTotals)
+                .map(([name, count]) => `> ${name}: ${count}`)
+                .join('\n')}\n`
+            : '') +
+          (Object.keys(mentahTotals).length > 0
+            ? `*Mentah:🍳*\n${Object.entries(mentahTotals)
+                .map(([name, count]) => `> ${name}: ${count}`)
+                .join('\n')}\n`
+            : '') +
+          `*Total Semua:* *${grandTotalItems} cireng* 🥟`
+        : '';
 
     const byText = byParam ? `\n\nTitip: ${byParam}` : '';
 
-    const whatsappUrl = `https://wa.me/6282318000199?text=${encodeURIComponent('Halo \n' + orderText + byText)}`;
+    const whatsappUrl = `https://wa.me/6282318000199?text=${encodeURIComponent('Halo \n' + orderText + summaryText + byText)}`;
     window.open(whatsappUrl, '_blank');
   };
 
