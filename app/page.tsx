@@ -6,6 +6,7 @@ import { Input } from '@/components/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/card';
 import { Minus, Plus, Send, PlusCircle } from 'lucide-react';
 import clsx from 'clsx';
+import toast, { Toaster } from 'react-hot-toast';
 
 interface MenuItem {
   name: string;
@@ -90,7 +91,7 @@ export default function Home() {
     });
 
     if (validOrders.length === 0) {
-      alert('Tolong isi minimal satu pesanan dengan nama dan item yang dipilih.');
+      toast.error('Tolong isi minimal satu pesanan dengan nama dan item yang dipilih.');
       return;
     }
 
@@ -159,13 +160,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-orange-50 to-amber-50 py-8 px-4">
+      <Toaster position="top-center" reverseOrder={false} />
       <div className="max-w-2xl mx-auto space-y-6">
         {orders.map((order, orderIndex) => {
           const totalItems = order.menuItems.reduce((sum, item) => sum + item.count, 0);
 
           return (
             <Card key={order.id} className="shadow-xl">
-              <CardHeader className="bg-blue-300 text-white">
+              <CardHeader className="bg-blue-300 text-white rounded-t-lg px-6 py-4">
                 <CardTitle className="text-xl font-bold text-center">
                   <div className="flex items-center justify-between w-full">
                     <span>Cireng Berisi - Order #{orderIndex + 1}</span>
@@ -275,7 +277,7 @@ export default function Home() {
         <Button
           onClick={addNewOrder}
           variant="outline"
-          className="w-full border-2 border-blue-500 text-blue-600 bg-gray-200 hover:bg-orange-50 text-lg py-6 active:scale-80 transition-transform duration-150"
+          className="w-full border-2 border-blue-500 text-blue-600 bg-gray-200 hover:bg-orange-50 text-lg py-6 active:scale-80 transition-transform duration-150 mb-20"
           type="button"
         >
           <PlusCircle className="mr-2 h-5 w-5" />
@@ -284,7 +286,7 @@ export default function Home() {
 
         <Button
           onClick={handleSubmit}
-          className="w-full bg-blue-500 hover:from-orange-600 hover:bg-blue-600 text-white text-lg py-6 shadow-lg fixed bottom-0 left-0 rounded-none"
+          className="w-full bg-blue-500 h-16 hover:from-orange-600 hover:bg-blue-600 text-white text-lg py-6 shadow-lg fixed bottom-0 left-0 rounded-none"
         >
           <Send className="mr-2 h-5 w-5" />
           Kirim Pesanan ke WhatsApp
