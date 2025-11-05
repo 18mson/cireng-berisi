@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/button';
 import { Input } from '@/components/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/card';
@@ -23,6 +23,10 @@ interface Order {
 }
 
 export default function Home() {
+  const [isScrolling, setIsScrolling] = useState(false);
+  const [isBottom, setIsBottom] = useState(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [orders, setOrders] = useState<Order[]>(() => {
     if (typeof window === 'undefined') {
       return [];
@@ -42,7 +46,33 @@ export default function Home() {
 
     return [{ id: 1, customerName: '', menuItems: initialItems }];
   });
-  
+
+
+    useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const onScroll = () => {
+      setIsScrolling(true);
+      console.log('scrolling');
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 100);
+
+      const scrolledToBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 10;
+      setIsBottom(scrolledToBottom);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    onScroll();
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const updateCount = (
     orderId: number,
@@ -83,12 +113,12 @@ export default function Home() {
     const kuahKejuPrice = byParam === 'salma' ? '3k' : '5k';
     
     const initialItems = [
-      { name: 'Keju', count: 0, price: '1k' },
-      { name: 'Jando', count: 0, price: '1k' },
-      { name: 'Ati', count: 0, price: '1k' },
+      { name: 'Keju', count: 0, price: '1k', },
+      { name: 'Jando', count: 0, price: '1k', label:'Pedas' },
+      { name: 'Ati', count: 0, price: '1k', label:'Pedas' },
       { name: 'Ayam', count: 0, price: '1k' },
-      { name: 'Seblak', count: 0, price: '1k' },
-      { name: 'Kuah Keju', count: 0, price: kuahKejuPrice }
+      { name: 'Seblak', count: 0, price: '1k', label:'Pedas' },
+      { name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru' }
     ];
     
     setOrders(prev => [...prev, {
@@ -129,7 +159,7 @@ export default function Home() {
         `Mau Cireng: *${matangMentahText}*\n` +
         `${orderItems.map(item => `• ${item.name}: ${item.count}`).join('\n')}\n` +
         `Total: *${totalItems}* 🥟` +
-        (totalKeju > 0 ? `\nKuah Keju: *${totalKeju} cup* 🍽` : '')
+        (totalKeju > 0 ? `\nKuah Keju: *${totalKeju} cup* 🥣🍵` : '')
       );
     }).join('\n\n-----\n\n');
 
@@ -319,7 +349,7 @@ export default function Home() {
         <Button
           onClick={addNewOrder}
           variant="outline"
-          className="w-full border-2 border-blue-500 text-blue-600 bg-gray-200 hover:bg-orange-50 text-lg py-6 active:scale-80 transition-transform duration-150 mb-20"
+          className="w-full border-2 border-blue-500 text-blue-600 bg-gray-200 hover:bg-orange-50 text-lg py-6 active:scale-80 transition-transform duration-150 mb-14"
           type="button"
         >
           <PlusCircle className="mr-2 h-5 w-5" />
@@ -327,10 +357,13 @@ export default function Home() {
         </Button>
         <Button
           onClick={handleSubmit}
-          className="w-full bg-blue-500 h-16 hover:from-orange-600 hover:bg-blue-600 text-white text-lg py-6 shadow-lg fixed bottom-0 left-0 rounded-none"
+          className={clsx(
+            ' hover:from-orange-600 hover:bg-blue-600 text-white text-lg py-6 shadow-lg left-0 fixed rounded-none transition-all duration-300',
+            isBottom && !isScrolling ? 'translate-x-0 w-full h-16 bottom-0 bg-blue-500' : 'bg-blue-500/50 backdrop-blur-md translate-x-1/2 w-1/2 rounded-4xl bottom-1 ml-20 md:ml-0 shadow-2xl'
+          )}
         >
           <Send className="mr-2 h-5 w-5" />
-          Kirim Pesanan -- Total: Rp{orders.reduce((sum, order) => 
+          {isBottom && !isScrolling ? 'Kirim Pesanan -- Total: ' : ''}Rp{orders.reduce((sum, order) => 
             sum + order.menuItems.reduce((orderSum, item) => 
               orderSum + (item.count * (item.price === '1k' ? 1 : item.price === '3k' ? 3 : 5)), 0
             ), 0
