@@ -11,6 +11,8 @@ import toast, { Toaster } from 'react-hot-toast';
 interface MenuItem {
   name: string;
   count: number;
+  price: string;
+  label?: string;
 }
 
 interface Order {
@@ -20,18 +22,26 @@ interface Order {
   isMentah?: boolean;
 }
 
-const initialMenuItems: MenuItem[] = [
-  { name: 'Keju', count: 0 },
-  { name: 'Jando', count: 0 },
-  { name: 'Ati', count: 0 },
-  { name: 'Ayam', count: 0 },
-  { name: 'Seblak', count: 0 },
-];
-
 export default function Home() {
-  const [orders, setOrders] = useState<Order[]>([
-    { id: 1, customerName: '', menuItems: [...initialMenuItems] }
-  ]);
+  const [orders, setOrders] = useState<Order[]>(() => {
+    if (typeof window === 'undefined') {
+      return [];
+    }
+    const params = new URLSearchParams(window.location.search);
+    const byParam = params.get('by');
+    const kuahKejuPrice = byParam === 'salma' ? '3k' : '5k';
+
+    const initialItems = [
+      { name: 'Keju', count: 0, price: '1k', },
+      { name: 'Jando', count: 0, price: '1k', label:'Pedas' },
+      { name: 'Ati', count: 0, price: '1k', label:'Pedas' },
+      { name: 'Ayam', count: 0, price: '1k' },
+      { name: 'Seblak', count: 0, price: '1k', label:'Pedas' },
+      { name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru' }
+    ];
+
+    return [{ id: 1, customerName: '', menuItems: initialItems }];
+  });
   
 
   const updateCount = (
@@ -68,10 +78,23 @@ export default function Home() {
 
   const addNewOrder = () => {
     const newId = Math.max(...orders.map(o => o.id)) + 1;
+    const params = new URLSearchParams(window.location.search);
+    const byParam = params.get('by');
+    const kuahKejuPrice = byParam === 'salma' ? '3k' : '5k';
+    
+    const initialItems = [
+      { name: 'Keju', count: 0, price: '1k' },
+      { name: 'Jando', count: 0, price: '1k' },
+      { name: 'Ati', count: 0, price: '1k' },
+      { name: 'Ayam', count: 0, price: '1k' },
+      { name: 'Seblak', count: 0, price: '1k' },
+      { name: 'Kuah Keju', count: 0, price: kuahKejuPrice }
+    ];
+    
     setOrders(prev => [...prev, {
       id: newId,
       customerName: '',
-      menuItems: [...initialMenuItems]
+      menuItems: initialItems
     }]);
 
     // Scroll to bottom after new order is added
@@ -97,14 +120,16 @@ export default function Home() {
 
     const orderText = validOrders.map(order => {
       const orderItems = order.menuItems.filter(item => item.count > 0);
-      const totalItems = orderItems.reduce((sum, item) => sum + item.count, 0);
+      const totalItems = orderItems.filter(item => item.name !== 'Kuah Keju').reduce((sum, item) => sum + item.count, 0);
       const matangMentahText = order.isMentah ? 'Mentah' : 'Matang';
+      const totalKeju = orderItems.filter(item => item.name === 'Kuah Keju').reduce((sum, item) => sum + item.count, 0);
 
       return (
         `saya: *${order.customerName}* ✨\n` +
         `Mau Cireng: *${matangMentahText}*\n` +
         `${orderItems.map(item => `• ${item.name}: ${item.count}`).join('\n')}\n` +
-        `Total: *${totalItems}* 🥟`
+        `Total: *${totalItems}* 🥟` +
+        (totalKeju > 0 ? `\nKuah Keju: *${totalKeju} cup* 🍽` : '')
       );
     }).join('\n\n-----\n\n');
 
@@ -116,13 +141,18 @@ export default function Home() {
       return acc;
     }, {});
 
-    const grandTotalItems = Object.values(grandTotals).reduce((sum, c) => sum + c, 0);
+    // Sum everything except "Kuah Keju"
+    const grandTotalItems = Object.entries(grandTotals)
+      .filter(([name]) => name !== 'Kuah Keju')
+      .reduce((sum, [, count]) => sum + count, 0);
 
     const matangTotals = validOrders
       .filter(o => !o.isMentah)
       .reduce<Record<string, number>>((acc, order) => {
         order.menuItems.forEach(item => {
-          if (item.count > 0) acc[item.name] = (acc[item.name] || 0) + item.count;
+          if (item.count > 0 && item.name !== 'Kuah Keju') {
+            acc[item.name] = (acc[item.name] || 0) + item.count;
+          }
         });
         return acc;
       }, {});
@@ -131,25 +161,30 @@ export default function Home() {
       .filter(o => o.isMentah)
       .reduce<Record<string, number>>((acc, order) => {
         order.menuItems.forEach(item => {
-          if (item.count > 0) acc[item.name] = (acc[item.name] || 0) + item.count;
+          if (item.count > 0 && item.name !== 'Kuah Keju') {
+            acc[item.name] = (acc[item.name] || 0) + item.count;
+          }
         });
         return acc;
       }, {});
+
+    const totalKuah = grandTotals['Kuah Keju'] || 0;
 
     const summaryText =
       validOrders.length > 1
         ? `\n\n----------------\n✨*Total Keseluruhan:*✨\n` +
           (Object.keys(matangTotals).length > 0
-            ? `*Matang:🍽*\n${Object.entries(matangTotals)
+            ? `*Matang:*🍽\n${Object.entries(matangTotals)
                 .map(([name, count]) => `> ${name}: ${count}`)
                 .join('\n')}\n`
             : '') +
           (Object.keys(mentahTotals).length > 0
-            ? `*Mentah:🍳*\n${Object.entries(mentahTotals)
+            ? `*Mentah:*🍳\n${Object.entries(mentahTotals)
                 .map(([name, count]) => `> ${name}: ${count}`)
                 .join('\n')}\n`
             : '') +
-          `*Total Semua:* *${grandTotalItems} cireng* 🥟`
+          `*Total Semua:* *${grandTotalItems} cireng* 🥟` +
+          (totalKuah > 0 ? `\n*Kuah Keju:* *${totalKuah} cup* 🍽` : '')
         : '';
 
     const byText = byParam ? `\n\nTitip: ${byParam}` : '';
@@ -163,7 +198,7 @@ export default function Home() {
       <Toaster position="top-center" reverseOrder={false} />
       <div className="max-w-2xl mx-auto space-y-6">
         {orders.map((order, orderIndex) => {
-          const totalItems = order.menuItems.reduce((sum, item) => sum + item.count, 0);
+          const totalItems = order.menuItems.reduce((sum, item) => item.name === 'Kuah Keju' ? sum : sum + item.count, 0);
 
           return (
             <Card key={order.id} className="shadow-xl">
@@ -199,7 +234,6 @@ export default function Home() {
                     className="text-lg"
                   />
                 </div>
-
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <h3 className="text-xl font-semibold text-gray-800">Menu</h3>
@@ -210,13 +244,22 @@ export default function Home() {
                   {order.menuItems.map((item, index) => (
                     <div
                       key={item.name}
-                      className={clsx('flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-orange-300 transition-colors',
-                        {'bg-gray-200' : item.count === 0,
-                          'bg-white': item.count > 0
+                      className={clsx('flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-orange-300 transition-colors duration-600',
+                        {'bg-linear-to-r from-gray-300 to-gray-200' : item.count === 0,
+                          'bg-linear-to-l from-yellow-400 to-yellow-200': item.count > 0
                         }
                       )}
                     >
-                      <span className="text-lg font-medium text-gray-800">{item.name}</span>
+                      {item.label && (
+                        <span className={clsx("absolute mb-16 -ml-6 font-medium text-sm px-2 rounded-full", {
+                          'text-white bg-red-600': item.label === 'Pedas',
+                          'text-gray-500 bg-yellow-300': item.label !== 'Pedas'
+                        })}>
+                          {item.label}
+                        </span>
+                      )}
+                      <span className="text-lg font-medium text-gray-800 flex-1">{item.name}</span>
+                      <span className="text-lg font-medium text-gray-800 flex-1 text-right pr-2">{item.price}</span>
                       <div className="flex items-center gap-3 group">
                         <Button
                           variant="outline"
@@ -243,7 +286,6 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
-
                   <div className="flex items-center justify-center mt-4">
                     <div
                       className={clsx(
@@ -283,13 +325,16 @@ export default function Home() {
           <PlusCircle className="mr-2 h-5 w-5" />
           Tambah Pesanan Baru
         </Button>
-
         <Button
           onClick={handleSubmit}
           className="w-full bg-blue-500 h-16 hover:from-orange-600 hover:bg-blue-600 text-white text-lg py-6 shadow-lg fixed bottom-0 left-0 rounded-none"
         >
           <Send className="mr-2 h-5 w-5" />
-          Kirim Pesanan ke WhatsApp
+          Kirim Pesanan -- Total: Rp{orders.reduce((sum, order) => 
+            sum + order.menuItems.reduce((orderSum, item) => 
+              orderSum + (item.count * (item.price === '1k' ? 1 : item.price === '3k' ? 3 : 5)), 0
+            ), 0
+          )}K
         </Button>
       </div>
     </div>
