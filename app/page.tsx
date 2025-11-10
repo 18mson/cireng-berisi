@@ -4,15 +4,17 @@ import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/button';
 import { Input } from '@/components/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/card';
-import { Minus, Plus, Send, PlusCircle } from 'lucide-react';
+import { Minus, Plus, Send, PlusCircle, ChevronUp } from 'lucide-react';
 import clsx from 'clsx';
 import toast, { Toaster } from 'react-hot-toast';
 
 interface MenuItem {
+  id: number;
   name: string;
   count: number;
   price: string;
   label?: string;
+  category: string;
 }
 
 interface Order {
@@ -25,7 +27,11 @@ interface Order {
 export default function Home() {
   const [isScrolling, setIsScrolling] = useState(false);
   const [isBottom, setIsBottom] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState<Record<string, boolean>>({});
+
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const categories = ['cireng', 'cibay', 'lainnya'];
 
   const [orders, setOrders] = useState<Order[]>(() => {
     if (typeof window === 'undefined') {
@@ -36,12 +42,14 @@ export default function Home() {
     const kuahKejuPrice = byParam === 'salma' ? '3k' : '5k';
 
     const initialItems = [
-      { name: 'Keju', count: 0, price: '1k', },
-      { name: 'Jando', count: 0, price: '1k', label:'Pedas' },
-      { name: 'Ati', count: 0, price: '1k', label:'Pedas' },
-      { name: 'Ayam', count: 0, price: '1k' },
-      { name: 'Seblak', count: 0, price: '1k', label:'Pedas' },
-      { name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru' }
+      { id: 1, name: 'Keju', count: 0, price: '1k', category: 'cireng' },
+      { id: 2, name: 'Jando', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
+      { id: 3, name: 'Ati', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
+      { id: 4, name: 'Ayam', count: 0, price: '1k', category: 'cireng' },
+      { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
+      { id: 6, name: 'cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
+      { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
+      { id: 8, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru', category: 'lainnya' }
     ];
 
     return [{ id: 1, customerName: '', menuItems: initialItems }];
@@ -76,7 +84,7 @@ export default function Home() {
 
   const updateCount = (
     orderId: number,
-    itemIndex: number,
+    itemId: number,
     delta: number,
     e: React.MouseEvent
   ) => {
@@ -86,10 +94,12 @@ export default function Home() {
     setOrders(prevOrders => 
       prevOrders.map(order => {
         if (order.id !== orderId) return order;
+        console.log(orderId);
+        
         return {
           ...order,
-          menuItems: order.menuItems.map((item, idx) =>
-            idx === itemIndex
+          menuItems: order.menuItems.map(item =>
+            item.id === itemId
               ? { ...item, count: Math.max(0, item.count + delta) }
               : item
           ),
@@ -113,12 +123,14 @@ export default function Home() {
     const kuahKejuPrice = byParam === 'salma' ? '3k' : '5k';
     
     const initialItems = [
-      { name: 'Keju', count: 0, price: '1k', },
-      { name: 'Jando', count: 0, price: '1k', label:'Pedas' },
-      { name: 'Ati', count: 0, price: '1k', label:'Pedas' },
-      { name: 'Ayam', count: 0, price: '1k' },
-      { name: 'Seblak', count: 0, price: '1k', label:'Pedas' },
-      { name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru' }
+      { id: 1, name: 'Keju', count: 0, price: '1k', category: 'cireng' },
+      { id: 2, name: 'Jando', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
+      { id: 3, name: 'Ati', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
+      { id: 4, name: 'Ayam', count: 0, price: '1k', category: 'cireng' },
+      { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
+      { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
+      { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
+      { id: 8, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru', category: 'lainnya' }
     ];
     
     setOrders(prev => [...prev, {
@@ -129,7 +141,7 @@ export default function Home() {
 
     // Scroll to bottom after new order is added
     setTimeout(() => {
-      window.scrollBy({ top: 300, behavior: 'smooth' });
+      window.scrollBy({ top: 500, behavior: 'smooth' });
     }, 100);
   };
 
@@ -213,7 +225,7 @@ export default function Home() {
                 .map(([name, count]) => `> ${name}: ${count}`)
                 .join('\n')}\n`
             : '') +
-          `*Total Semua:* *${grandTotalItems} cireng* 🥟` +
+          `*Total Semua:* *${grandTotalItems}* 🥟 ` +
           (totalKuah > 0 ? `\n*Kuah Keju:* *${totalKuah} cup* 🍽` : '')
         : '';
 
@@ -223,8 +235,54 @@ export default function Home() {
     window.open(whatsappUrl, '_blank');
   };
 
+  const renderItems = (item: MenuItem, orderIndex: number) => (
+    <div
+      key={item.name}
+      className={clsx('flex items-center justify-between p-3 border-2 border-gray-200 rounded-xl hover:border-orange-300 transition-colors duration-600',
+        {'bg-linear-to-r from-gray-300 to-gray-200' : item.count === 0,
+          'bg-linear-to-l from-yellow-400 to-yellow-200': item.count > 0
+        }
+      )}
+    >
+      {item.label && (
+        <span className={clsx("absolute mb-14 -ml-6 font-medium text-sm px-2 rounded-full", {
+          'text-white bg-red-600': item.label === 'Pedas',
+          'text-gray-500 bg-yellow-300': item.label !== 'Pedas'
+        })}>
+          {item.label}
+        </span>
+      )}
+      <span className="font-medium text-gray-800 flex-1">{item.name}</span>
+      <span className="text-lg font-medium text-gray-800 flex-1 text-right pr-2">{item.price}</span>
+      <div className="flex items-center gap-3 group">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => updateCount(orders[orderIndex].id, item.id, -1, e)}
+          disabled={item.count === 0}
+          className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
+          type="button"
+        >
+          <Minus className="h-4 w-4" />
+        </Button>
+        <span className="text-xl font-semibold min-w-8 text-center text-gray-900 group-active:animate-ping">
+          {item.count}
+        </span>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => updateCount(orders[orderIndex].id, item.id, 1, e)}
+          className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
+          type="button"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-linear-to-br from-orange-50 to-amber-50 py-8 px-4">
+    <div className="min-h-screen bg-linear-to-br from-orange-50 to-amber-50 py-6 md:px-4 px-2">
       <Toaster position="top-center" reverseOrder={false} />
       <div className="max-w-2xl mx-auto space-y-6">
         {orders.map((order, orderIndex) => {
@@ -250,7 +308,7 @@ export default function Home() {
                   </div>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 space-y-6">
+              <CardContent className="p-2 py-4 space-y-6">
                 <div className="space-y-2">
                   <label htmlFor={`name-${order.id}`} className="text-lg font-medium text-gray-700">
                     Nama
@@ -271,51 +329,43 @@ export default function Home() {
                       Total: {totalItems} 🥟
                     </h3>
                   </div>
-                  {order.menuItems.map((item, index) => (
-                    <div
-                      key={item.name}
-                      className={clsx('flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-orange-300 transition-colors duration-600',
-                        {'bg-linear-to-r from-gray-300 to-gray-200' : item.count === 0,
-                          'bg-linear-to-l from-yellow-400 to-yellow-200': item.count > 0
-                        }
-                      )}
-                    >
-                      {item.label && (
-                        <span className={clsx("absolute mb-16 -ml-6 font-medium text-sm px-2 rounded-full", {
-                          'text-white bg-red-600': item.label === 'Pedas',
-                          'text-gray-500 bg-yellow-300': item.label !== 'Pedas'
-                        })}>
-                          {item.label}
-                        </span>
-                      )}
-                      <span className="text-lg font-medium text-gray-800 flex-1">{item.name}</span>
-                      <span className="text-lg font-medium text-gray-800 flex-1 text-right pr-2">{item.price}</span>
-                      <div className="flex items-center gap-3 group">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={(e) => updateCount(order.id, index, -1, e)}
-                          disabled={item.count === 0}
-                          className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
-                          type="button"
+                  {categories.map((category) => {
+                    const categoryCollapsed = isCollapsed[category] ?? false;
+                    return (
+                      <div className="bg-gray-100 rounded-2xl pb-2 border hover:bg-gray-200" key={category}>
+                        <div
+                          className="flex justify-between items-center cursor-pointer rounded-2xl p-2 py-2"
+                          onClick={() =>
+                            setIsCollapsed((prev) => ({
+                              ...prev,
+                              [category]: !categoryCollapsed,
+                            }))
+                          }
                         >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        <span className="text-xl font-semibold min-w-8 text-center text-gray-900 group-active:animate-ping">
-                          {item.count}
-                        </span>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={(e) => updateCount(order.id, index, 1, e)}
-                          className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
-                          type="button"
+                          <h3 className="text-sm font-semibold text-gray-800 text-uppercase">
+                            {category}
+                          </h3>
+                          <ChevronUp
+                            className={clsx(
+                              'h-6 w-6 text-gray-600 transition-transform duration-300',
+                              { 'rotate-180': categoryCollapsed }
+                            )}
+                          />
+                        </div>
+                        <div
+                          className={clsx(
+                            'space-y-2 px-2 overflow-hidden transition-all duration-300 ease-in-out',
+                            categoryCollapsed ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'
+                          )}
                         >
-                          <Plus className="h-4 w-4" />
-                        </Button>
+                          {order.menuItems.filter(item => item.category === category).map((item) => (
+                            renderItems(item, orderIndex)
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
+                  
                   <div className="flex items-center justify-center mt-4">
                     <div
                       className={clsx(
