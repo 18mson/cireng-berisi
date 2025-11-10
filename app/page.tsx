@@ -47,7 +47,7 @@ export default function Home() {
       { id: 3, name: 'Ati', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
       { id: 4, name: 'Ayam', count: 0, price: '1k', category: 'cireng' },
       { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
-      { id: 6, name: 'cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
+      { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 8, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru', category: 'lainnya' }
     ];
@@ -61,7 +61,6 @@ export default function Home() {
 
     const onScroll = () => {
       setIsScrolling(true);
-      console.log('scrolling');
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         setIsScrolling(false);
