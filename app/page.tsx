@@ -375,7 +375,7 @@ export default function Home() {
                       onClick={() =>
                         setOrders((prevOrders) =>
                           prevOrders.map((o) =>
-                            o.id === order.id ? { ...o, isMentah: !o.isMentah, isBojot: false } : o
+                            o.id === order.id ? { ...o, isMentah: !o.isMentah } : o
                           )
                         )
                       }
@@ -390,55 +390,46 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <AnimatePresence>
-                    {!order.isMentah && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: -10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                        transition={{ duration: 0.3, ease: 'easeInOut' }}
-                      >
-                        <div className="flex items-center justify-center mt-4">
+                    <div>
+                      <div className="flex items-center justify-center mt-4">
+                        <div
+                          className={clsx(
+                            'flex items-center w-56 h-8 rounded-full cursor-pointer transition-colors',
+                            order.isBojot ? 'bg-red-400' : 'bg-green-400'
+                          )}
+                          onClick={() =>
+                            setOrders((prevOrders) =>
+                              prevOrders.map((o) =>
+                                o.id === order.id ? { ...o, isBojot: !o.isBojot } : o
+                              )
+                            )
+                          }
+                        >
                           <div
                             className={clsx(
-                              'flex items-center w-56 h-8 rounded-full cursor-pointer transition-colors',
-                              order.isBojot ? 'bg-red-400' : 'bg-green-400'
+                              'w-1/2 h-full flex items-center justify-center text-white font-bold rounded-full transition-transform active:scale-80',
+                              order.isBojot ? 'translate-x-0 bg-red-600' : 'translate-x-full bg-green-600'
                             )}
-                            onClick={() =>
-                              setOrders((prevOrders) =>
-                                prevOrders.map((o) =>
-                                  o.id === order.id ? { ...o, isBojot: !o.isBojot } : o
-                                )
-                              )
-                            }
                           >
-                            <div
-                              className={clsx(
-                                'w-1/2 h-full flex items-center justify-center text-white font-bold rounded-full transition-transform active:scale-80',
-                                order.isBojot ? 'translate-x-0 bg-red-600' : 'translate-x-full bg-green-600'
-                              )}
-                            >
-                              {order.isBojot ? 'Bojot' : 'Original'}
-                            </div>
-                            <p className="text-white font-bold px-2 text-center">baru 🔥🔥</p>
+                            {order.isBojot ? 'Bojot' : 'Original'}
                           </div>
+                          <p className="text-white font-bold px-2 text-center">baru 🔥🔥</p>
                         </div>
-                        <AnimatePresence>
-                          {order.isBojot && (
-                            <motion.p
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              exit={{ opacity: 0, height: 0 }}
-                              transition={{ duration: 0.3 }}
-                              className="text-red-500 font-semibold text-center text-sm px-1 overflow-hidden"
-                            >
-                              Minimal 5 cireng / cibay
-                            </motion.p>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                      </div>
+                      <AnimatePresence>
+                        {order.isBojot && (
+                          <motion.p
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="text-red-500 font-semibold text-center text-sm px-1 overflow-hidden"
+                          >
+                            Minimal 5 cireng / cibay
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </div>
 
 
                   {categories.map((category) => {
