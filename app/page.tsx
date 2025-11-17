@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/card';
 import { Minus, Plus, Send, PlusCircle, ChevronUp } from 'lucide-react';
 import clsx from 'clsx';
 import toast, { Toaster } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
+
+
 
 interface MenuItem {
   id: number;
@@ -22,6 +25,7 @@ interface Order {
   customerName: string;
   menuItems: MenuItem[];
   isMentah?: boolean;
+  isBojot?: boolean;
 }
 
 export default function Home() {
@@ -151,23 +155,39 @@ export default function Home() {
     const validOrders = orders.filter(order => {
       const hasName = order.customerName.trim();
       const hasItems = order.menuItems.some(item => item.count > 0);
-      return hasName && hasItems;
+      const cirengCount = order.menuItems
+        .filter(item => item.category === 'cireng' || item.category === 'cibay')
+        .reduce((sum, item) => sum + item.count, 0);
+      const isBojot = order.isBojot && cirengCount > 0;
+      return hasName && hasItems && (!isBojot || cirengCount >= 5);
     });
 
     if (validOrders.length === 0) {
-      toast.error('Tolong isi minimal satu pesanan dengan nama dan item yang dipilih.');
+      const anyBojotUnder5 = orders.some(order => {
+        const cirengCount = order.menuItems
+          .filter(item => item.category === 'cireng' || item.category === 'cibay')
+          .reduce((sum, item) => sum + item.count, 0);
+        return order.isBojot && cirengCount > 0 && cirengCount < 5;
+      });
+      toast.error(
+        anyBojotUnder5
+          ? 'Pesanan Bojot minimal 5 cireng / cibay.'
+          : 'Tolong isi minimal satu pesanan dengan nama dan item yang dipilih.'
+      );
       return;
     }
+    
 
     const orderText = validOrders.map(order => {
       const orderItems = order.menuItems.filter(item => item.count > 0);
       const totalItems = orderItems.filter(item => item.name !== 'Kuah Keju').reduce((sum, item) => sum + item.count, 0);
       const matangMentahText = order.isMentah ? 'Mentah' : 'Matang';
       const totalKeju = orderItems.filter(item => item.name === 'Kuah Keju').reduce((sum, item) => sum + item.count, 0);
+      const bojotText = order.isBojot ? '*di Bojot ♨️*' : '';
 
       return (
         `saya: *${order.customerName}* ✨\n` +
-        `Mau Cireng: *${matangMentahText}*\n` +
+        `Mau Cireng: *${matangMentahText }* ${bojotText}\n` +
         `${orderItems.map(item => `• ${item.name}: ${item.count}`).join('\n')}\n` +
         `Total: *${totalItems}* 🥟` +
         (totalKeju > 0 ? `\nKuah Keju: *${totalKeju} cup* 🥣🍵` : '')
@@ -209,6 +229,17 @@ export default function Home() {
         return acc;
       }, {});
 
+      const bojotTotals = validOrders
+      .filter(o => o.isBojot)
+      .reduce<Record<string, number>>((acc, order) => {
+        order.menuItems.forEach(item => {
+          if (item.count > 0 && item.name !== 'Kuah Keju') {
+            acc[item.name] = (acc[item.name] || 0) + item.count;
+          }
+        });
+        return acc;
+      }, {});
+
     const totalKuah = grandTotals['Kuah Keju'] || 0;
 
     const summaryText =
@@ -224,6 +255,12 @@ export default function Home() {
                 .map(([name, count]) => `> ${name}: ${count}`)
                 .join('\n')}\n`
             : '') +
+          (Object.keys(bojotTotals).length > 0
+            ? `*Bojot:*🍽\n${Object.entries(bojotTotals)
+                .map(([name, count]) => `> ${name}: ${count}`)
+                .join('\n')}\n`
+            : '') +
+          
           `*Total Semua:* *${grandTotalItems}* 🥟 ` +
           (totalKuah > 0 ? `\n*Kuah Keju:* *${totalKuah} cup* 🍽` : '')
         : '';
@@ -328,10 +365,90 @@ export default function Home() {
                       Total: {totalItems} 🥟
                     </h3>
                   </div>
+                  
+                  <div className="flex items-center justify-center mt-4">
+                    <div
+                      className={clsx(
+                        'flex items-center w-56 h-8 rounded-full cursor-pointer transition-colors',
+                        order.isMentah ? 'bg-red-400' : 'bg-green-400'
+                      )}
+                      onClick={() =>
+                        setOrders((prevOrders) =>
+                          prevOrders.map((o) =>
+                            o.id === order.id ? { ...o, isMentah: !o.isMentah, isBojot: false } : o
+                          )
+                        )
+                      }
+                    >
+                      <div
+                        className={clsx(
+                          'w-1/2 h-full flex items-center justify-center text-white font-bold rounded-full transition-transform active:scale-80',
+                          order.isMentah ? 'translate-x-0 bg-red-600' : 'translate-x-full bg-green-600'
+                        )}
+                      >
+                        {order.isMentah ? 'Mentah' : 'Matang'}
+                      </div>
+                    </div>
+                  </div>
+                  <AnimatePresence>
+                    {!order.isMentah && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      >
+                        <div className="flex items-center justify-center mt-4">
+                          <div
+                            className={clsx(
+                              'flex items-center w-56 h-8 rounded-full cursor-pointer transition-colors',
+                              order.isBojot ? 'bg-red-400' : 'bg-green-400'
+                            )}
+                            onClick={() =>
+                              setOrders((prevOrders) =>
+                                prevOrders.map((o) =>
+                                  o.id === order.id ? { ...o, isBojot: !o.isBojot } : o
+                                )
+                              )
+                            }
+                          >
+                            <div
+                              className={clsx(
+                                'w-1/2 h-full flex items-center justify-center text-white font-bold rounded-full transition-transform active:scale-80',
+                                order.isBojot ? 'translate-x-0 bg-red-600' : 'translate-x-full bg-green-600'
+                              )}
+                            >
+                              {order.isBojot ? 'Bojot' : 'Original'}
+                            </div>
+                            <p className="text-white font-bold px-2 text-center">baru 🔥🔥</p>
+                          </div>
+                        </div>
+                        <AnimatePresence>
+                          {order.isBojot && (
+                            <motion.p
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="text-red-500 font-semibold text-center text-sm px-1 overflow-hidden"
+                            >
+                              Minimal 5 cireng / cibay
+                            </motion.p>
+                          )}
+                        </AnimatePresence>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+
                   {categories.map((category) => {
                     const categoryCollapsed = isCollapsed[category] ?? false;
                     return (
-                      <div className="bg-gray-100 rounded-2xl pb-2 border hover:bg-gray-200" key={category}>
+                      <div className={clsx("rounded-2xl pb-2 border hover:bg-gray-200", {
+                        'bg-red-300' : order.isBojot,
+                        'bg-gray-100' : !order.isBojot,
+                        
+                      })} key={category}>
                         <div
                           className="flex justify-between items-center cursor-pointer rounded-2xl p-2 py-2"
                           onClick={() =>
@@ -365,30 +482,6 @@ export default function Home() {
                     );
                   })}
                   
-                  <div className="flex items-center justify-center mt-4">
-                    <div
-                      className={clsx(
-                        'flex items-center w-60 h-10 rounded-full cursor-pointer transition-colors',
-                        order.isMentah ? 'bg-red-400' : 'bg-green-400'
-                      )}
-                      onClick={() =>
-                        setOrders((prevOrders) =>
-                          prevOrders.map((o) =>
-                            o.id === order.id ? { ...o, isMentah: !o.isMentah } : o
-                          )
-                        )
-                      }
-                    >
-                      <div
-                        className={clsx(
-                          'w-1/2 h-full flex items-center justify-center text-white font-bold rounded-full transition-transform active:scale-80',
-                          order.isMentah ? 'translate-x-0 bg-red-600' : 'translate-x-full bg-green-600'
-                        )}
-                      >
-                        {order.isMentah ? 'Mentah' : 'Matang'}
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </CardContent>
             </Card>
