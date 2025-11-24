@@ -251,7 +251,7 @@ export default function Home() {
                 .join('\n')}\n`
             : '') +
 
-          `*Total Semua:* *${grandTotalItems} Cireng* 🥟 ` +
+          `*Total Semua:* *${grandTotalItems}* 🥟 ` +
           (totalKuah > 0 ? `\n*Kuah Keju:* *${totalKuah} cup* 🍽` : '')
         : '';
 
