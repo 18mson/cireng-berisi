@@ -2,16 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/button';
-import { Input } from '@/components/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/card';
-import { Minus, Plus, Send, PlusCircle, ChevronUp } from 'lucide-react';
+import { Send, PlusCircle } from 'lucide-react';
 import clsx from 'clsx';
 import toast, { Toaster } from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { OrderCard } from '@/components/OrderCard';
 
-
-
-interface MenuItem {
+export interface MenuItemType {
   id: number;
   name: string;
   count: number;
@@ -23,7 +19,7 @@ interface MenuItem {
 interface Order {
   id: number;
   customerName: string;
-  menuItems: MenuItem[];
+  menuItems: MenuItemType[];
   isMentah?: boolean;
   isBojot?: boolean;
 }
@@ -53,14 +49,13 @@ export default function Home() {
       { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
       { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
-      { id: 8, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru', category: 'lainnya' }
+      { id: 8, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
     ];
 
     return [{ id: 1, customerName: '', menuItems: initialItems }];
   });
 
-
-    useEffect(() => {
+  useEffect(() => {
     if (typeof window === "undefined") return;
 
     const onScroll = () => {
@@ -94,11 +89,10 @@ export default function Home() {
     e.preventDefault();
     e.stopPropagation();
 
-    setOrders(prevOrders => 
+    setOrders(prevOrders =>
       prevOrders.map(order => {
         if (order.id !== orderId) return order;
-        console.log(orderId);
-        
+
         return {
           ...order,
           menuItems: order.menuItems.map(item =>
@@ -109,9 +103,7 @@ export default function Home() {
         };
       })
     );
-
   };
-
 
   const updateCustomerName = (orderId: number, name: string) => {
     setOrders(prev => prev.map(order =>
@@ -124,7 +116,7 @@ export default function Home() {
     const params = new URLSearchParams(window.location.search);
     const byParam = params.get('by');
     const kuahKejuPrice = byParam === 'salma' ? '3k' : '5k';
-    
+
     const initialItems = [
       { id: 1, name: 'Keju', count: 0, price: '1k', category: 'cireng' },
       { id: 2, name: 'Jando', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
@@ -135,10 +127,10 @@ export default function Home() {
       { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 8, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru', category: 'lainnya' }
     ];
-    
+
     setOrders(prev => [...prev, {
       id: newId,
-      customerName: '',
+      customerName: `${orders?.length ? orders[0].customerName : 'Pesanan'} ${newId}`,
       menuItems: initialItems
     }]);
 
@@ -150,7 +142,7 @@ export default function Home() {
 
   const handleSubmit = () => {
     const params = new URLSearchParams(window.location.search);
-    const byParam = params.get('by'); 
+    const byParam = params.get('by');
 
     const validOrders = orders.filter(order => {
       const hasName = order.customerName.trim();
@@ -176,7 +168,6 @@ export default function Home() {
       );
       return;
     }
-    
 
     const orderText = validOrders.map(order => {
       const orderItems = order.menuItems.filter(item => item.count > 0);
@@ -193,7 +184,6 @@ export default function Home() {
         (totalKeju > 0 ? `\nKuah Keju: *${totalKeju} cup* 🥣🍵` : '')
       );
     }).join('\n\n-----\n\n');
-
 
     const grandTotals = validOrders.reduce<Record<string, number>>((acc, order) => {
       order.menuItems.forEach(item => {
@@ -246,12 +236,12 @@ export default function Home() {
       validOrders.length > 1
         ? `\n\n----------------\n✨*Total Keseluruhan:*✨\n` +
           (Object.keys(matangTotals).length > 0
-            ? `*Matang:*🍽\n${Object.entries(matangTotals)
+            ? `*Matang:* *${Object.values(matangTotals).reduce((a, b) => a + b, 0)}*🍽 \n${Object.entries(matangTotals)
                 .map(([name, count]) => `> ${name}: ${count}`)
                 .join('\n')}\n`
             : '') +
           (Object.keys(mentahTotals).length > 0
-            ? `*Mentah:*🍳\n${Object.entries(mentahTotals)
+            ? `*Mentah:* *${Object.values(mentahTotals).reduce((a, b) => a + b, 0)}*🍳\n${Object.entries(mentahTotals)
                 .map(([name, count]) => `> ${name}: ${count}`)
                 .join('\n')}\n`
             : '') +
@@ -260,8 +250,8 @@ export default function Home() {
                 .map(([name, count]) => `> ${name}: ${count}`)
                 .join('\n')}\n`
             : '') +
-          
-          `*Total Semua:* *${grandTotalItems}* 🥟 ` +
+
+          `*Total Semua:* *${grandTotalItems} Cireng* 🥟 ` +
           (totalKuah > 0 ? `\n*Kuah Keju:* *${totalKuah} cup* 🍽` : '')
         : '';
 
@@ -271,213 +261,52 @@ export default function Home() {
     window.open(whatsappUrl, '_blank');
   };
 
-  const renderItems = (item: MenuItem, orderIndex: number) => (
-    <div
-      key={item.name}
-      className={clsx('flex items-center justify-between p-3 border-2 border-gray-200 rounded-xl hover:border-orange-300 transition-colors duration-600',
-        {'bg-linear-to-r from-gray-300 to-gray-200' : item.count === 0,
-          'bg-linear-to-l from-yellow-400 to-yellow-200': item.count > 0
-        }
-      )}
-    >
-      {item.label && (
-        <span className={clsx("absolute mb-14 -ml-6 font-medium text-sm px-2 rounded-full", {
-          'text-white bg-red-600': item.label === 'Pedas',
-          'text-gray-500 bg-yellow-300': item.label !== 'Pedas'
-        })}>
-          {item.label}
-        </span>
-      )}
-      <span className="font-medium text-gray-800 flex-1">{item.name}</span>
-      <span className="text-lg font-medium text-gray-800 flex-1 text-right pr-2">{item.price}</span>
-      <div className="flex items-center gap-3 group">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={(e) => updateCount(orders[orderIndex].id, item.id, -1, e)}
-          disabled={item.count === 0}
-          className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
-          type="button"
-        >
-          <Minus className="h-4 w-4" />
-        </Button>
-        <span className="text-xl font-semibold min-w-8 text-center text-gray-900 group-active:animate-ping">
-          {item.count}
-        </span>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={(e) => updateCount(orders[orderIndex].id, item.id, 1, e)}
-          className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
-          type="button"
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
-  );
+  const toggleMentah = (orderId: number) => {
+    setOrders(prevOrders =>
+      prevOrders.map(o =>
+        o.id === orderId ? { ...o, isMentah: !o.isMentah } : o
+      )
+    );
+  };
+
+  const toggleBojot = (orderId: number) => {
+    setOrders(prevOrders =>
+      prevOrders.map(o =>
+        o.id === orderId ? { ...o, isBojot: !o.isBojot } : o
+      )
+    );
+  };
+
+  const toggleCategory = (category: string) => {
+    setIsCollapsed(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
+  const removeOrder = (orderId: number) => {
+    setOrders(prev => prev.filter(o => o.id !== orderId));
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-orange-50 to-amber-50 py-6 md:px-4 px-2">
       <Toaster position="top-center" reverseOrder={false} />
       <div className="max-w-2xl mx-auto space-y-6">
-        {orders.map((order, orderIndex) => {
-          const totalItems = order.menuItems.reduce((sum, item) => item.name === 'Kuah Keju' ? sum : sum + item.count, 0);
-
-          return (
-            <Card key={order.id} className="shadow-xl">
-              <CardHeader className="bg-blue-300 text-white rounded-t-lg px-6 py-4">
-                <CardTitle className="text-xl font-bold text-center">
-                  <div className="flex items-center justify-between w-full">
-                    <span>Cireng Berisi - Order #{orderIndex + 1}</span>
-                    {orders.length > 1 && (
-                      <button
-                        onClick={() =>
-                          setOrders((prev) => prev.filter((o) => o.id !== order.id))
-                        }
-                        className="hover:text-red-700 font-bold active:scale-80 h-10 w-10 transition-transform duration-150 bg-gray-500 text-white rounded-full p-1"
-                        aria-label="Remove order"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-2 py-4 space-y-6">
-                <div className="space-y-2">
-                  <label htmlFor={`name-${order.id}`} className="text-lg font-medium text-gray-700">
-                    Nama
-                  </label>
-                  <Input
-                    id={`name-${order.id}`}
-                    type="text"
-                    placeholder="Pesanan atas nama..."
-                    value={order.customerName}
-                    onChange={(e) => updateCustomerName(order.id, e.target.value)}
-                    className="text-lg"
-                  />
-                </div>
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <h3 className="text-xl font-semibold text-gray-800">Menu</h3>
-                    <h3 className="text-xl font-semibold text-gray-800">
-                      Total: {totalItems} 🥟
-                    </h3>
-                  </div>
-                  
-                  <div className="flex items-center justify-center mt-4">
-                    <div
-                      className={clsx(
-                        'flex items-center w-56 h-8 rounded-full cursor-pointer transition-colors',
-                        order.isMentah ? 'bg-red-400' : 'bg-green-400'
-                      )}
-                      onClick={() =>
-                        setOrders((prevOrders) =>
-                          prevOrders.map((o) =>
-                            o.id === order.id ? { ...o, isMentah: !o.isMentah } : o
-                          )
-                        )
-                      }
-                    >
-                      <div
-                        className={clsx(
-                          'w-1/2 h-full flex items-center justify-center text-white font-bold rounded-full transition-transform active:scale-80',
-                          order.isMentah ? 'translate-x-0 bg-red-600' : 'translate-x-full bg-green-600'
-                        )}
-                      >
-                        {order.isMentah ? 'Mentah' : 'Matang'}
-                      </div>
-                    </div>
-                  </div>
-                    <div>
-                      <div className="flex items-center justify-center mt-4">
-                        <div
-                          className={clsx(
-                            'flex items-center w-56 h-8 rounded-full cursor-pointer transition-colors',
-                            order.isBojot ? 'bg-red-400' : 'bg-green-400'
-                          )}
-                          onClick={() =>
-                            setOrders((prevOrders) =>
-                              prevOrders.map((o) =>
-                                o.id === order.id ? { ...o, isBojot: !o.isBojot } : o
-                              )
-                            )
-                          }
-                        >
-                          <div
-                            className={clsx(
-                              'w-1/2 h-full flex items-center justify-center text-white font-bold rounded-full transition-transform active:scale-80',
-                              order.isBojot ? 'translate-x-0 bg-red-600' : 'translate-x-full bg-green-600'
-                            )}
-                          >
-                            {order.isBojot ? 'Bojot' : 'Original'}
-                          </div>
-                          <p className="text-white font-bold px-2 text-center">baru 🔥🔥</p>
-                        </div>
-                      </div>
-                      <AnimatePresence>
-                        {order.isBojot && (
-                          <motion.p
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="text-red-500 font-semibold text-center text-sm px-1 overflow-hidden"
-                          >
-                            Minimal 5 cireng / cibay
-                          </motion.p>
-                        )}
-                      </AnimatePresence>
-                    </div>
-
-
-                  {categories.map((category) => {
-                    const categoryCollapsed = isCollapsed[category] ?? false;
-                    return (
-                      <div className={clsx("rounded-2xl pb-2 border hover:bg-gray-200", {
-                        'bg-red-300' : order.isBojot,
-                        'bg-gray-100' : !order.isBojot,
-                        
-                      })} key={category}>
-                        <div
-                          className="flex justify-between items-center cursor-pointer rounded-2xl p-2 py-2"
-                          onClick={() =>
-                            setIsCollapsed((prev) => ({
-                              ...prev,
-                              [category]: !categoryCollapsed,
-                            }))
-                          }
-                        >
-                          <h3 className="text-sm font-semibold text-gray-800 text-uppercase">
-                            {category}
-                          </h3>
-                          <ChevronUp
-                            className={clsx(
-                              'h-6 w-6 text-gray-600 transition-transform duration-300',
-                              { 'rotate-180': categoryCollapsed }
-                            )}
-                          />
-                        </div>
-                        <div
-                          className={clsx(
-                            'space-y-2 px-2 overflow-hidden transition-all duration-300 ease-in-out',
-                            categoryCollapsed ? 'max-h-0 opacity-0' : 'max-h-[500px] opacity-100'
-                          )}
-                        >
-                          {order.menuItems.filter(item => item.category === category).map((item) => (
-                            renderItems(item, orderIndex)
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+        {orders.map((order, orderIndex) => (
+          <OrderCard
+            key={order.id}
+            order={order}
+            orderIndex={orderIndex}
+            updateCount={updateCount}
+            updateCustomerName={updateCustomerName}
+            removeOrder={removeOrder}
+            toggleMentah={toggleMentah}
+            toggleBojot={toggleBojot}
+            isCollapsed={isCollapsed}
+            toggleCategory={toggleCategory}
+            categories={categories}
+          />
+        ))}
 
         <Button
           onClick={addNewOrder}
@@ -496,8 +325,8 @@ export default function Home() {
           )}
         >
           <Send className="mr-2 h-5 w-5" />
-          {isBottom && !isScrolling ? 'Kirim Pesanan -- Total: ' : ''}Rp{orders.reduce((sum, order) => 
-            sum + order.menuItems.reduce((orderSum, item) => 
+          {isBottom && !isScrolling ? 'Kirim Pesanan -- Total: ' : ''}Rp{orders.reduce((sum, order) =>
+            sum + order.menuItems.reduce((orderSum, item) =>
               orderSum + (item.count * (item.price === '1k' ? 1 : item.price === '3k' ? 3 : 5)), 0
             ), 0
           )}K

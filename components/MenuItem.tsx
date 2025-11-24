@@ -1,0 +1,62 @@
+import React from 'react';
+import { Button } from '@/components/button';
+import { Minus, Plus } from 'lucide-react';
+import clsx from 'clsx';
+
+interface MenuItemProps {
+  item: {
+    id: number;
+    name: string;
+    count: number;
+    price: string;
+    label?: string;
+  };
+  orderId: number;
+  updateCount: (orderId: number, itemId: number, delta: number, e: React.MouseEvent) => void;
+}
+
+export const MenuItem: React.FC<MenuItemProps> = ({ item, orderId, updateCount }) => {
+  return (
+    <div
+      className={clsx('flex items-center justify-between p-3 border-2 border-gray-200 rounded-xl hover:border-orange-300 transition-colors duration-600',
+        {'bg-linear-to-r from-gray-300 to-gray-200' : item.count === 0,
+          'bg-linear-to-l from-yellow-400 to-yellow-200': item.count > 0
+        })}
+    >
+      {item.label && (
+        <span className={clsx("absolute mb-14 -ml-6 font-medium text-sm px-2 rounded-full",
+          {'text-white bg-red-600': item.label === 'Pedas',
+          'text-gray-500 bg-yellow-300': item.label !== 'Pedas'}
+        )}>
+          {item.label}
+        </span>
+      )}
+      <span className="font-medium text-gray-800 flex-1">{item.name}</span>
+      <span className="text-lg font-medium text-gray-800 flex-1 text-right pr-2">{item.price}</span>
+      <div className="flex items-center gap-3 group">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => updateCount(orderId, item.id, -1, e)}
+          disabled={item.count === 0}
+          className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
+          type="button"
+        >
+          <Minus className="h-4 w-4" />
+        </Button>
+        <span className="text-xl font-semibold min-w-8 text-center text-gray-900 group-active:animate-ping">
+          {item.count}
+        </span>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={(e) => updateCount(orderId, item.id, 1, e)}
+          className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
+          type="button"
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+};
