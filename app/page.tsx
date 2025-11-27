@@ -31,7 +31,7 @@ export default function Home() {
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const categories = ['cireng', 'cibay', 'lainnya'];
+  const categories = ['cireng', 'cibay', 'lumpia', 'lainnya'];
 
   const [orders, setOrders] = useState<Order[]>(() => {
     if (typeof window === 'undefined') {
@@ -49,7 +49,8 @@ export default function Home() {
       { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
       { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
-      { id: 8, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
+      { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
+      { id: 9, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
     ];
 
     return [{ id: 1, customerName: '', menuItems: initialItems }];
@@ -125,7 +126,8 @@ export default function Home() {
       { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
       { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
-      { id: 8, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru', category: 'lainnya' }
+      { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
+      { id: 9, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Baru', category: 'lainnya' }
     ];
 
     setOrders(prev => [...prev, {
@@ -223,7 +225,7 @@ export default function Home() {
       .filter(o => o.isBojot)
       .reduce<Record<string, number>>((acc, order) => {
         order.menuItems.forEach(item => {
-          if (item.count > 0 && item.name !== 'Kuah Keju') {
+          if (item.count > 0 && item.category === 'cireng' || item.category === 'cibay') {
             acc[item.name] = (acc[item.name] || 0) + item.count;
           }
         });
