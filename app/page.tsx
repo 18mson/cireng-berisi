@@ -176,7 +176,7 @@ export default function Home() {
       const totalItems = orderItems.filter(item => item.name !== 'Kuah Keju').reduce((sum, item) => sum + item.count, 0);
       const matangMentahText = order.isMentah ? 'Mentah' : 'Matang';
       const totalKeju = orderItems.filter(item => item.name === 'Kuah Keju').reduce((sum, item) => sum + item.count, 0);
-      const bojotText = order.isBojot ? '*di Bojot ♨️*' : '';
+      const bojotText = order.isBojot ? '*diBojot ♨️*' : '';
 
       return (
         `saya: *${order.customerName}* ✨\n` +

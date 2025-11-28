@@ -22,10 +22,10 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   warningText
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center mt-4">
+    <div className="flex flex-col items-center justify-start w-full h-14">
       <div
         className={clsx(
-          'flex items-center w-56 h-8 rounded-full cursor-pointer transition-colors bg-gray-300 border-2 border-gray-200',
+          'flex items-center min-w-[120px] w-full h-10 rounded-full cursor-pointer transition-colors bg-gray-300 border-2 border-gray-200',
         )}
         onClick={onToggle}
       >

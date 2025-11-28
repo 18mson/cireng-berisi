@@ -89,25 +89,25 @@ export const OrderCard: React.FC<OrderCardProps> = ({
               Total: {totalItems} 🥟
             </h3>
           </div>
-
-          <ToggleSwitch
-            isActive={order.isMentah || false}
-            onToggle={() => toggleMentah(order.id)}
-            activeText="Mentah"
-            inactiveText="Matang"
-            activeColor="#91FEEA"
-            inactiveColor="#FF5656"
-          />
-
-          <ToggleSwitch
-            isActive={order.isBojot || false}
-            onToggle={() => toggleBojot(order.id)}
-            activeText="Bojot"
-            inactiveText="Original"
-            activeColor="#BF1A1A"
-            inactiveColor="#FF5656"
-            warningText="Minimal 5 cireng / cibay"
-          />
+          <div className="flex w-full justify-between gap-x-4">
+            <ToggleSwitch
+              isActive={order.isMentah || false}
+              onToggle={() => toggleMentah(order.id)}
+              activeText="Mentah"
+              inactiveText="Matang"
+              activeColor="#91FEEA"
+              inactiveColor="#FF5656"
+            />
+            <ToggleSwitch
+              isActive={order.isBojot || false}
+              onToggle={() => toggleBojot(order.id)}
+              activeText="Bojot"
+              inactiveText="Original"
+              activeColor="#BF1A1A"
+              inactiveColor="#FF5656"
+              warningText="Minimal 5 cireng / cibay"
+            />
+          </div>
 
           {categories.map((category, categoryIndex) => {
             const categoryCollapsed = isCollapsed[category] ?? false;
