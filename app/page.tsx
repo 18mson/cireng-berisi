@@ -31,7 +31,7 @@ export default function Home() {
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const categories = ['cireng', 'cibay', 'lumpia', 'lainnya'];
+  const categories = ['cireng', 'cibay', 'lumpia ubi', 'lainnya'];
 
   const [orders, setOrders] = useState<Order[]>(() => {
     if (typeof window === 'undefined') {
@@ -49,8 +49,8 @@ export default function Home() {
       { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
       { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
-      { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
-      { id: 9, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
+      { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi' },
+      { id: 9, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi' },
       { id: 10, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
     ];
 
@@ -127,8 +127,8 @@ export default function Home() {
       { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
       { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
-      { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
-      { id: 9, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
+      { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi' },
+      { id: 9, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi' },
       { id: 10, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
     ];
 
