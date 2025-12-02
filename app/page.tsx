@@ -50,8 +50,8 @@ export default function Home() {
       { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
-      { id: 8, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
-      { id: 9, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
+      { id: 9, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
+      { id: 10, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
     ];
 
     return [{ id: 1, customerName: '', menuItems: initialItems }];
@@ -128,8 +128,8 @@ export default function Home() {
       { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
       { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
-      { id: 8, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
-      { id: 9, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
+      { id: 9, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia' },
+      { id: 10, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
     ];
 
     setOrders(prev => [...prev, {
