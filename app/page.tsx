@@ -31,7 +31,7 @@ export default function Home() {
     { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay', status: 'available' },
     { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi', status: 'available' },
     { id: 9, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi', status: 'available' },
-    { id: 10, name: 'Kuah Keju', count: 0, price: '3k', label: 'Kuah aja', category: 'lainnya', status: 'available' }
+    { id: 10, name: 'Kuah Keju', count: 0, price: '5k', label: 'Kuah aja', category: 'lainnya', status: 'available' }
   ];
 
   const [orders, setOrders] = useState<Order[]>(() => {
@@ -71,13 +71,21 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const byParam = params.get('by');
+    const kuahKejuPrice = byParam === 'salma' ? '3k' : '5k';
+
     fetch(getSheetUrl())
       .then(res => res.json())
       .then(data => {
         const fetchedMenuItems = sheetToObjects(data.values || []);
         console.log('Parsed menu items:', fetchedMenuItems);
-        setMenuItems(fetchedMenuItems);
-        setOrders(prev => prev.map(order => ({ ...order, menuItems: fetchedMenuItems.map(item => ({ ...item, count: 0 })) })));
+        const adjustedMenuItems = fetchedMenuItems.map(item => ({
+          ...item,
+          price: item.name === 'Kuah Keju' ? kuahKejuPrice : item.price
+        }));
+        setMenuItems(adjustedMenuItems);
+        setOrders(prev => prev.map(order => ({ ...order, menuItems: adjustedMenuItems.map(item => ({ ...item, count: 0 })) })));
       })
       .catch(err => console.error('Error fetching data:', err));
   }, []);
