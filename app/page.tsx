@@ -1,60 +1,48 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
+
 import { Button } from '@/components/button';
 import { Send, PlusCircle } from 'lucide-react';
 import clsx from 'clsx';
 import toast, { Toaster } from 'react-hot-toast';
 import { OrderCard } from '@/components/OrderCard';
+import { calculateTotalPrice, Order, sheetToObjects, MenuItemType } from '@/lib/Utils';
+import { getSheetUrl } from '@/lib/api';
 
-export interface MenuItemType {
-  id: number;
-  name: string;
-  count: number;
-  price: string;
-  label?: string;
-  category: string;
-}
-
-interface Order {
-  id: number;
-  customerName: string;
-  menuItems: MenuItemType[];
-  isMentah?: boolean;
-  isBojot?: boolean;
-}
 
 export default function Home() {
   const [isScrolling, setIsScrolling] = useState(false);
   const [isBottom, setIsBottom] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState<Record<string, boolean>>({});
+  const [menuItems, setMenuItems] = useState<MenuItemType[]>([]);
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const categories = ['cireng', 'cibay', 'lumpia ubi', 'lainnya'];
 
+  const defaultItems: MenuItemType[] = [
+    { id: 1, name: 'Keju', count: 0, price: '1k', category: 'cireng', status: 'available' },
+    { id: 2, name: 'Jando', count: 0, price: '1k', label:'Pedas', category: 'cireng', status: 'available' },
+    { id: 3, name: 'Ati', count: 0, price: '1k', label:'Pedas', category: 'cireng', status: 'available' },
+    { id: 4, name: 'Ayam', count: 0, price: '1k', category: 'cireng', status: 'available' },
+    { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng', status: 'available' },
+    { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay', status: 'available' },
+    { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay', status: 'available' },
+    { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi', status: 'available' },
+    { id: 9, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi', status: 'available' },
+    { id: 10, name: 'Kuah Keju', count: 0, price: '3k', label: 'Kuah aja', category: 'lainnya', status: 'available' }
+  ];
+
   const [orders, setOrders] = useState<Order[]>(() => {
-    if (typeof window === 'undefined') {
-      return [];
-    }
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
     const byParam = params.get('by');
     const kuahKejuPrice = byParam === 'salma' ? '3k' : '5k';
-
-    const initialItems = [
-      { id: 1, name: 'Keju', count: 0, price: '1k', category: 'cireng' },
-      { id: 2, name: 'Jando', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
-      { id: 3, name: 'Ati', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
-      { id: 4, name: 'Ayam', count: 0, price: '1k', category: 'cireng' },
-      { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
-      { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
-      { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
-      { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi' },
-      { id: 9, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi' },
-      { id: 10, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
-    ];
-
-    return [{ id: 1, customerName: '', menuItems: initialItems }];
+    const items = defaultItems.map(item => ({
+      ...item,
+      price: item.name === 'Kuah Keju' ? kuahKejuPrice : item.price
+    }));
+    return [{ id: 1, customerName: '', menuItems: items }];
   });
 
   useEffect(() => {
@@ -80,6 +68,18 @@ export default function Home() {
       window.removeEventListener("scroll", onScroll);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
+  }, []);
+
+  useEffect(() => {
+    fetch(getSheetUrl())
+      .then(res => res.json())
+      .then(data => {
+        const fetchedMenuItems = sheetToObjects(data.values || []);
+        console.log('Parsed menu items:', fetchedMenuItems);
+        setMenuItems(fetchedMenuItems);
+        setOrders(prev => prev.map(order => ({ ...order, menuItems: fetchedMenuItems.map(item => ({ ...item, count: 0 })) })));
+      })
+      .catch(err => console.error('Error fetching data:', err));
   }, []);
 
   const updateCount = (
@@ -119,18 +119,12 @@ export default function Home() {
     const byParam = params.get('by');
     const kuahKejuPrice = byParam === 'salma' ? '3k' : '5k';
 
-    const initialItems = [
-      { id: 1, name: 'Keju', count: 0, price: '1k', category: 'cireng' },
-      { id: 2, name: 'Jando', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
-      { id: 3, name: 'Ati', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
-      { id: 4, name: 'Ayam', count: 0, price: '1k', category: 'cireng' },
-      { id: 5, name: 'Seblak', count: 0, price: '1k', label:'Pedas', category: 'cireng' },
-      { id: 6, name: 'Cibay lumer', count: 0, price: '1k', label:'Baru', category: 'cibay' },
-      { id: 7, name: 'Cibay ayam', count: 0, price: '1k', label:'Baru', category: 'cibay' },
-      { id: 8, name: 'Lumpia Ubi Keju', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi' },
-      { id: 9, name: 'Lumpia Ubi Coklat', count: 0, price: '1k', label:'Baru', category: 'lumpia ubi' },
-      { id: 10, name: 'Kuah Keju', count: 0, price: kuahKejuPrice, label: 'Kuah aja', category: 'lainnya' }
-    ];
+    const currentMenuItems = menuItems.length > 0 ? menuItems : defaultItems;
+    const initialItems = currentMenuItems.map(item => ({
+      ...item,
+      count: 0,
+      price: item.name === 'Kuah Keju' ? kuahKejuPrice : item.price
+    }));
 
     setOrders(prev => [...prev, {
       id: newId,
@@ -227,7 +221,7 @@ export default function Home() {
       .filter(o => o.isBojot)
       .reduce<Record<string, number>>((acc, order) => {
         order.menuItems.forEach(item => {
-          if (item.count > 0 && item.category === 'cireng' || item.category === 'cibay') {
+          if (item.count > 0 && (item.category === 'cireng' || item.category === 'cibay')) {
             acc[item.name] = (acc[item.name] || 0) + item.count;
           }
         });
@@ -329,13 +323,10 @@ export default function Home() {
           )}
         >
           <Send className="mr-2 h-5 w-5" />
-          {isBottom && !isScrolling ? 'Kirim Pesanan -- Total: ' : ''}Rp{orders.reduce((sum, order) =>
-            sum + order.menuItems.reduce((orderSum, item) =>
-              orderSum + (item.count * (item.price === '1k' ? 1 : item.price === '3k' ? 3 : 5)), 0
-            ), 0
-          )}K
+          {isBottom && !isScrolling ? 'Kirim Pesanan -- Total: ' : ''}Rp{calculateTotalPrice(orders)}K
         </Button>
       </div>
     </div>
   );
 }
+

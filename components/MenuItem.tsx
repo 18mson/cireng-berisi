@@ -10,17 +10,21 @@ interface MenuItemProps {
     count: number;
     price: string;
     label?: string;
+    status?: string;
   };
   orderId: number;
   updateCount: (orderId: number, itemId: number, delta: number, e: React.MouseEvent) => void;
 }
 
 export const MenuItem: React.FC<MenuItemProps> = ({ item, orderId, updateCount }) => {
+  const isSold = item.status !== 'available';
+
   return (
     <div
       className={clsx('flex items-center justify-between p-3 border-2 border-gray-200 rounded-xl hover:border-orange-300 transition-colors duration-600',
         {'bg-linear-to-r from-gray-300 to-gray-200' : item.count === 0,
-          'bg-linear-to-l from-yellow-400 to-yellow-200': item.count > 0
+          'bg-linear-to-l from-yellow-400 to-yellow-200': item.count > 0,
+          'opacity-50': isSold
         })}
     >
       {item.label && (
@@ -31,8 +35,8 @@ export const MenuItem: React.FC<MenuItemProps> = ({ item, orderId, updateCount }
           {item.label}
         </span>
       )}
-      <span className="font-medium text-gray-800 flex-1">{item.name}</span>
-      <span className="text-lg font-medium text-gray-800 flex-1 text-right pr-2">{item.price}</span>
+      <span className={clsx("font-medium flex-1", isSold ? 'text-gray-500 line-through' : 'text-gray-800')}>{item.name}</span>
+      <span className={clsx("text-lg font-medium flex-1 text-right pr-2", isSold ? 'text-gray-500' : 'text-gray-800')}>{isSold ? 'SOLD OUT' : item.price}</span>
       <div className="flex items-center gap-3 group">
         <Button
           variant="outline"
@@ -51,6 +55,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({ item, orderId, updateCount }
           variant="outline"
           size="icon"
           onClick={(e) => updateCount(orderId, item.id, 1, e)}
+          disabled={isSold}
           className="h-10 w-10 rounded-full active:scale-80 transition-transform duration-150"
           type="button"
         >
