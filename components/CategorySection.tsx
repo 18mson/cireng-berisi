@@ -1,7 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import { ChevronUp } from 'lucide-react';
-import { MenuItemType } from '@/app/page';
+import { MenuItemType } from '@/lib/Utils';
 
 
 
