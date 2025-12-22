@@ -21,9 +21,9 @@ export const MenuItem: React.FC<MenuItemProps> = ({ item, orderId, updateCount }
 
   return (
     <div
-      className={clsx('flex items-center justify-between p-3 border-2 border-gray-200 rounded-xl hover:border-orange-300 transition-colors duration-600',
-        {'bg-linear-to-r from-gray-300 to-gray-200' : item.count === 0,
-          'bg-linear-to-l from-yellow-400 to-yellow-200': item.count > 0,
+      className={clsx('flex items-center justify-between p-3 border-2 border-white/30 rounded-xl hover:border-orange-300 transition-colors duration-600 backdrop-blur-sm',
+        {'bg-linear-to-r from-white/40 to-white/20' : item.count === 0,
+          'bg-linear-to-l from-yellow-400/50 to-yellow-200/50 border-yellow-400/50': item.count > 0,
           'opacity-50': isSold
         })}
     >

@@ -50,15 +50,15 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   const totalItems = order.menuItems.reduce((sum, item) => item.name === 'Kuah Keju' ? sum : sum + item.count, 0);
 
   return (
-    <Card key={order.id} className="shadow-xl">
-      <CardHeader className="bg-blue-300 text-white rounded-t-lg px-6 py-4">
+    <Card key={order.id} className="shadow-2xl backdrop-blur-xl bg-white/40 border-white/50 border">
+      <CardHeader className="bg-white/40 backdrop-blur-xl text-gray-800 rounded-t-lg px-6 py-4 border-b border-white/50">
         <CardTitle className="text-xl font-bold text-center">
           <div className="flex items-center justify-between w-full">
             <span>Cireng Berisi - Order #{orderIndex + 1}</span>
             {orderIndex > 0 && (
               <button
                 onClick={() => removeOrder(order.id)}
-                className="hover:text-red-700 font-bold active:scale-80 h-10 w-10 transition-transform duration-150 bg-gray-500 text-white rounded-full p-1"
+                className="hover:text-red-700 font-bold active:scale-80 h-10 w-10 transition-transform duration-150 bg-white/20 backdrop-blur-sm border border-white/30 text-gray-700 rounded-full p-1"
                 aria-label="Remove order"
               >
                 ✕

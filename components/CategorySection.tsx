@@ -25,9 +25,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   orderIndex
 }) => {
   return (
-    <div className={clsx("rounded-2xl pb-2 border hover:bg-gray-200", {
-      'bg-red-300': isBojot,
-      'bg-gray-100': !isBojot,
+    <div className={clsx("rounded-2xl pb-2 border border-white/30 hover:bg-white/30 transition-colors duration-300", {
+      'bg-red-500/20': isBojot,
+      'bg-white/20': !isBojot,
     })} key={`${category}-${orderIndex}`}>
       <div
         className="flex justify-between items-center cursor-pointer rounded-2xl p-2 py-2"

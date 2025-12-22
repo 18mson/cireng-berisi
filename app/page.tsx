@@ -295,7 +295,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-orange-50 to-amber-50 py-6 md:px-4 px-2">
+    <div className="min-h-screen py-6 md:px-4 px-2" style={{ backgroundImage: 'url(/food-bg.webp)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundAttachment: 'fixed' }}>
       <Toaster position="top-center" reverseOrder={false} />
       <div className="max-w-2xl mx-auto space-y-6">
         {orders.map((order, orderIndex) => (
@@ -317,7 +317,7 @@ export default function Home() {
         <Button
           onClick={addNewOrder}
           variant="outline"
-          className="w-full border-2 border-blue-500 text-blue-600 bg-gray-200 hover:bg-orange-50 text-lg py-6 active:scale-80 transition-transform duration-150 mb-14"
+          className="w-full border-2 border-blue-500/50 text-blue-700 bg-white/30 backdrop-blur-sm hover:bg-white/50 text-lg py-6 active:scale-80 transition-transform duration-150 mb-14"
           type="button"
         >
           <PlusCircle className="mr-2 h-5 w-5" />
@@ -326,8 +326,8 @@ export default function Home() {
         <Button
           onClick={handleSubmit}
           className={clsx(
-            ' hover:from-orange-600 hover:bg-blue-600 text-white text-lg py-6 shadow-lg left-0 fixed rounded-none transition-all duration-300',
-            isBottom && !isScrolling ? 'translate-x-0 w-full h-16 bottom-0 bg-blue-500' : 'bg-blue-500/50 backdrop-blur-md translate-x-1/2 w-1/2 rounded-4xl bottom-1 ml-20 md:ml-0 shadow-2xl'
+            ' hover:from-orange-600 hover:bg-blue-600/90 text-white text-lg py-6 shadow-lg left-0 fixed rounded-none transition-all duration-300',
+            isBottom && !isScrolling ? 'translate-x-0 w-full h-16 bottom-0 bg-blue-600/80 backdrop-blur-xl' : 'bg-blue-500/50 backdrop-blur-md translate-x-1/2 w-1/2 rounded-4xl bottom-1 ml-20 md:ml-0 shadow-2xl'
           )}
         >
           <Send className="mr-2 h-5 w-5" />
