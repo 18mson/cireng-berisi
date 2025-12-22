@@ -295,7 +295,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen py-6 md:px-4 px-2" style={{ backgroundImage: 'url(/food-bg.webp)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', backgroundAttachment: 'fixed' }}>
+    <div className="min-h-screen py-6 md:px-4 px-2">
       <Toaster position="top-center" reverseOrder={false} />
       <div className="max-w-2xl mx-auto space-y-6">
         {orders.map((order, orderIndex) => (
@@ -326,8 +326,8 @@ export default function Home() {
         <Button
           onClick={handleSubmit}
           className={clsx(
-            ' hover:from-orange-600 hover:bg-blue-600/90 text-white text-lg py-6 shadow-lg left-0 fixed rounded-none transition-all duration-300',
-            isBottom && !isScrolling ? 'translate-x-0 w-full h-16 bottom-0 bg-blue-600/80 backdrop-blur-xl' : 'bg-blue-500/50 backdrop-blur-md translate-x-1/2 w-1/2 rounded-4xl bottom-1 ml-20 md:ml-0 shadow-2xl'
+            ' hover:from-pink-600 hover:bg-pink-600/90 text-white text-lg py-6 shadow-lg left-0 fixed rounded-none transition-all duration-300',
+            isBottom && !isScrolling ? 'translate-x-0 w-full h-16 bottom-0 bg-pink-500/80 backdrop-blur-xl' : 'bg-pink-400/50 backdrop-blur-md translate-x-1/2 w-1/2 rounded-4xl bottom-1 ml-20 md:ml-0 shadow-2xl'
           )}
         >
           <Send className="mr-2 h-5 w-5" />
